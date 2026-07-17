@@ -72,6 +72,22 @@ class WearAuthRepository {
     return login(email, password);
   }
 
+  Future<void> updateProfile({
+    String? name,
+    String? email,
+    String? password,
+    String? currentPassword,
+  }) async {
+    await _dio.patch('/users/me', data: {
+      if (name != null && name.isNotEmpty) 'name': name,
+      if (email != null && email.isNotEmpty) 'email': email,
+      if (password != null && password.isNotEmpty) ...{
+        'password': password,
+        'currentPassword': currentPassword ?? '',
+      },
+    });
+  }
+
   Future<List<WearFamilyMember>> getFamilyMembers() async {
     final response = await _dio.get('/users');
     final list = response.data as List<dynamic>;

@@ -3,6 +3,7 @@ import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
 import 'wear_account_screen.dart';
 import 'wear_add_task_screen.dart';
+import 'wear_edit_profile_screen.dart';
 
 class WearMenuScreen extends StatelessWidget {
   const WearMenuScreen({super.key});
@@ -37,6 +38,14 @@ class WearMenuScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                       builder: (_) => const WearAddTaskScreen()),
+                ),
+              ),
+              _MenuItem(
+                icon: Icons.person_outline,
+                label: 'Mi perfil',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const WearEditProfileScreen()),
                 ),
               ),
               _MenuItem(
