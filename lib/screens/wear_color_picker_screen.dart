@@ -38,7 +38,10 @@ class WearColorPickerScreen extends StatelessWidget {
                   child: _PaletteTile(
                     palette: palette,
                     isSelected: controller.palette.id == palette.id,
-                    onTap: () => controller.setPalette(palette),
+                    onTap: () {
+                      controller.setPalette(palette);
+                      Navigator.of(context).popUntil((r) => r.isFirst);
+                    },
                   ),
                 ),
               ),
