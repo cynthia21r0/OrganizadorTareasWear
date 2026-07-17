@@ -39,6 +39,7 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
     await AuthStorage.setActive(account.userId);
     WearApiClient.instance.token = account.token;
     WearApiClient.instance.userId = account.userId;
+    WearApiClient.instance.userRole = account.role;
 
     final tasks = await WearTaskRepository().getMyTasks(account.userId);
     if (!mounted) return;
@@ -291,12 +292,14 @@ class _WearLoginFormState extends State<_WearLoginForm> {
         token: result.token,
         userId: result.userId,
         userName: result.userName,
+        role: result.role,
         profilePicture: result.profilePicture,
       );
       await AuthStorage.saveAccount(account);
 
       WearApiClient.instance.token = result.token;
       WearApiClient.instance.userId = result.userId;
+      WearApiClient.instance.userRole = result.role;
 
       final tasks = await WearTaskRepository().getMyTasks(result.userId);
       if (!mounted) return;
@@ -384,12 +387,14 @@ class _WearRegisterFormState extends State<_WearRegisterForm> {
         token: result.token,
         userId: result.userId,
         userName: result.userName,
+        role: result.role,
         profilePicture: result.profilePicture,
       );
       await AuthStorage.saveAccount(account);
 
       WearApiClient.instance.token = result.token;
       WearApiClient.instance.userId = result.userId;
+      WearApiClient.instance.userRole = result.role;
 
       final tasks = await WearTaskRepository().getMyTasks(result.userId);
       if (!mounted) return;

@@ -31,27 +31,33 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
       // Intentar recuperar sesión guardada
       final saved = await AuthStorage.loadActive();
       String token, userId, userName;
+      String role = 'otro';
       String? profilePicture;
 
       if (saved != null) {
         token = saved.token;
         userId = saved.userId;
         userName = saved.userName;
+        role = saved.role;
         profilePicture = saved.profilePicture;
         WearApiClient.instance.token = token;
         WearApiClient.instance.userId = userId;
+        WearApiClient.instance.userRole = role;
       } else {
         final result = await WearAuthRepository().getFirstUser();
         token = result.token;
         userId = result.userId;
         userName = result.userName;
+        role = result.role;
         profilePicture = result.profilePicture;
         WearApiClient.instance.token = token;
         WearApiClient.instance.userId = userId;
+        WearApiClient.instance.userRole = role;
         await AuthStorage.saveAccount(SavedAccount(
           token: token,
           userId: userId,
           userName: userName,
+          role: role,
           profilePicture: profilePicture,
         ));
       }

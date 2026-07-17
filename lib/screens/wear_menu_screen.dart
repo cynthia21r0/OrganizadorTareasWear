@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
 import 'wear_account_screen.dart';
+import 'wear_add_task_screen.dart';
 
 class WearMenuScreen extends StatelessWidget {
   const WearMenuScreen({super.key});
@@ -30,6 +31,14 @@ class WearMenuScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
+              _MenuItem(
+                icon: Icons.add_task,
+                label: 'Nueva tarea',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const WearAddTaskScreen()),
+                ),
+              ),
               _MenuItem(
                 icon: Icons.manage_accounts_outlined,
                 label: 'Cuentas',
