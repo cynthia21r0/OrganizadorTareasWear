@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../services/wear_api_client.dart';
-import '../../services/wear_auth_repository.dart';
-import '../../services/wear_task_repository.dart';
-import '../../services/notification_service.dart';
-import '../../models/wear_task.dart';
-import '../../theme/wear_colors.dart';
+import '../services/wear_api_client.dart';
+import '../services/wear_auth_repository.dart';
+import '../services/wear_task_repository.dart';
+import '../services/notification_service.dart';
+import '../services/auth_storage.dart';
+import '../widgets/wear_error_tile.dart';
+import '../models/wear_task.dart';
+import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import 'task_list_screen.dart';
 
 class WearSplashScreen extends StatefulWidget {
@@ -27,12 +30,41 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
     try {
       await NotificationService().init();
 
-      final result = await WearAuthRepository().getFirstUser();
+      // Intentar recuperar sesión guardada
+      final saved = await AuthStorage.loadActive();
+      String token, userId, userName;
+      String role = 'otro';
+      String? profilePicture;
 
-      WearApiClient.instance.token = result.token;
-      WearApiClient.instance.userId = result.userId;
+      if (saved != null) {
+        token = saved.token;
+        userId = saved.userId;
+        userName = saved.userName;
+        role = saved.role;
+        profilePicture = saved.profilePicture;
+        WearApiClient.instance.token = token;
+        WearApiClient.instance.userId = userId;
+        WearApiClient.instance.userRole = role;
+      } else {
+        final result = await WearAuthRepository().getFirstUser();
+        token = result.token;
+        userId = result.userId;
+        userName = result.userName;
+        role = result.role;
+        profilePicture = result.profilePicture;
+        WearApiClient.instance.token = token;
+        WearApiClient.instance.userId = userId;
+        WearApiClient.instance.userRole = role;
+        await AuthStorage.saveAccount(SavedAccount(
+          token: token,
+          userId: userId,
+          userName: userName,
+          role: role,
+          profilePicture: profilePicture,
+        ));
+      }
 
-      final tasks = await WearTaskRepository().getMyTasks(result.userId);
+      final tasks = await WearTaskRepository().getMyTasks(userId);
 
       final pendingTasksCount = tasks
           .where((t) => t.status == WearTaskStatus.pendiente)
@@ -47,21 +79,21 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => TaskListScreen(
-            userName: result.userName.isNotEmpty ? result.userName : 'Usuario',
-            profilePicture: result.profilePicture,
+            userName: userName.isNotEmpty ? userName : 'Usuario',
+            profilePicture: profilePicture,
             initialTasks: tasks,
           ),
         ),
       );
     } catch (e) {
-      if (mounted) {
-        setState(() => _error = 'Error: $e');
-      }
+      await AuthStorage.clearAll();
+      if (mounted) setState(() => _error = friendlyError(e));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final primary = WearTheme.primary(context);
     return Scaffold(
       backgroundColor: WearColors.background,
       body: Center(
@@ -75,7 +107,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: WearColors.headerTeal,
+                  color: primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -85,7 +117,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'HomeTasks',
                 style: TextStyle(
                   fontSize: 16,
@@ -95,11 +127,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
               ),
               const SizedBox(height: 16),
               if (_error != null) ...[
-                Text(
-                  _error!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Colors.redAccent),
-                ),
+                WearErrorTile(_error!),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {
@@ -107,7 +135,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                     _loadFirstUser();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WearColors.headerTeal,
+                    backgroundColor: primary,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text(
@@ -116,18 +144,18 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                   ),
                 ),
               ] else ...[
-                const SizedBox(
+                SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: WearColors.headerTeal,
+                    color: primary,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Cargando...',
-                  style: TextStyle(fontSize: 12, color: WearColors.headerTeal),
+                  style: TextStyle(fontSize: 12, color: primary),
                 ),
               ],
             ],
