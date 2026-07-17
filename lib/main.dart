@@ -26,17 +26,14 @@ class HomeTasksWearApp extends StatelessWidget {
   }
 }
 
-class _AppRoot extends StatefulWidget {
+class _AppRoot extends StatelessWidget {
   const _AppRoot();
 
   @override
-  State<_AppRoot> createState() => _AppRootState();
-}
-
-class _AppRootState extends State<_AppRoot> {
-  @override
   Widget build(BuildContext context) {
-    final primary = WearTheme.primary(context);
+    // ThemeData es estático: las pantallas leen el color dinámico directamente
+    // a través de WearTheme.of(context), evitando reconstruir MaterialApp
+    // en cada cambio de paleta (lo que causaba el retraso visible).
     return MaterialApp(
       title: 'HomeTasks Wear',
       debugShowCheckedModeBanner: false,
@@ -45,8 +42,8 @@ class _AppRootState extends State<_AppRoot> {
         scaffoldBackgroundColor: WearColors.background,
         fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: primary,
-          primary: primary,
+          seedColor: WearColors.headerTeal,
+          primary: WearColors.headerTeal,
         ),
       ),
       home: const WearSplashScreen(),

@@ -7,6 +7,7 @@ import '../services/auth_storage.dart';
 import '../widgets/wear_error_tile.dart';
 import '../models/wear_task.dart';
 import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import 'task_list_screen.dart';
 
 class WearSplashScreen extends StatefulWidget {
@@ -92,6 +93,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = WearTheme.primary(context);
     return Scaffold(
       backgroundColor: WearColors.background,
       body: Center(
@@ -105,7 +107,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: WearColors.headerTeal,
+                  color: primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -133,7 +135,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                     _loadFirstUser();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: WearColors.headerTeal,
+                    backgroundColor: primary,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text(
@@ -147,13 +149,13 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: WearColors.headerTeal,
+                    color: primary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Cargando...',
-                  style: TextStyle(fontSize: 12, color: WearColors.headerTeal),
+                  style: TextStyle(fontSize: 12, color: primary),
                 ),
               ],
             ],

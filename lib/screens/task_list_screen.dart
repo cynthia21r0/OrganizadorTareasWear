@@ -24,11 +24,35 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   late List<WearTask> _tasks;
+  WearThemeController? _themeController;
 
   @override
   void initState() {
     super.initState();
     _tasks = widget.initialTasks;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Suscribirse al controller del tema para reconstruir esta pantalla
+    // inmediatamente cuando cambie la paleta (p.ej. al volver del selector).
+    final controller = WearTheme.of(context);
+    if (_themeController != controller) {
+      _themeController?.removeListener(_onThemeChanged);
+      _themeController = controller;
+      _themeController!.addListener(_onThemeChanged);
+    }
+  }
+
+  void _onThemeChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _themeController?.removeListener(_onThemeChanged);
+    super.dispose();
   }
 
   int get _completedCount =>
