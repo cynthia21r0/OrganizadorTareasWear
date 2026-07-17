@@ -4,6 +4,7 @@ import '../services/wear_auth_repository.dart';
 import '../services/wear_task_repository.dart';
 import '../services/notification_service.dart';
 import '../services/auth_storage.dart';
+import '../widgets/wear_error_tile.dart';
 import '../models/wear_task.dart';
 import '../theme/wear_colors.dart';
 import 'task_list_screen.dart';
@@ -84,11 +85,8 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
         ),
       );
     } catch (e) {
-      // Si el token guardado ya no es válido, limpiar y reintentar con login
       await AuthStorage.clearAll();
-      if (mounted) {
-        setState(() => _error = 'Error: $e');
-      }
+      if (mounted) setState(() => _error = friendlyError(e));
     }
   }
 
@@ -127,11 +125,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
               ),
               const SizedBox(height: 16),
               if (_error != null) ...[
-                Text(
-                  _error!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Colors.redAccent),
-                ),
+                WearErrorTile(_error!),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {

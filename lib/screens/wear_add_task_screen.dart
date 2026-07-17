@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/wear_api_client.dart';
 import '../services/wear_auth_repository.dart';
 import '../services/wear_task_repository.dart';
+import '../widgets/wear_error_tile.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
 import 'task_list_screen.dart';
@@ -123,7 +124,7 @@ class _WearAddTaskScreenState extends State<WearAddTaskScreen> {
         (route) => false,
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -233,12 +234,7 @@ class _WearAddTaskScreenState extends State<WearAddTaskScreen> {
                     const SizedBox(height: 10),
 
                     if (_error != null) ...[
-                      Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 10, color: Colors.redAccent),
-                      ),
+                      WearErrorTile(_error!),
                       const SizedBox(height: 8),
                     ],
 

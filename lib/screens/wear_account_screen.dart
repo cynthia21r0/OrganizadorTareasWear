@@ -5,6 +5,7 @@ import '../services/wear_auth_repository.dart';
 import '../services/wear_task_repository.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
+import '../widgets/wear_error_tile.dart';
 import 'task_list_screen.dart';
 
 class WearAccountScreen extends StatefulWidget {
@@ -315,7 +316,7 @@ class _WearLoginFormState extends State<_WearLoginForm> {
         (route) => false,
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -410,7 +411,7 @@ class _WearRegisterFormState extends State<_WearRegisterForm> {
         (route) => false,
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -513,11 +514,7 @@ class _AuthFormScaffold extends StatelessWidget {
               ...fields,
               const SizedBox(height: 10),
               if (error != null) ...[
-                Text(
-                  error!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10, color: Colors.redAccent),
-                ),
+                WearErrorTile(error!),
                 const SizedBox(height: 8),
               ],
               GestureDetector(
