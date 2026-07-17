@@ -31,4 +31,5 @@ class WearApiClient {
 
   String? token;
   String? userId;
+  String? userRole;
 }

@@ -5,12 +5,14 @@ class WearLoginResult {
   final String token;
   final String userId;
   final String userName;
+  final String role;
   final String? profilePicture;
 
   const WearLoginResult({
     required this.token,
     required this.userId,
     required this.userName,
+    this.role = 'otro',
     this.profilePicture,
   });
 }
@@ -86,6 +88,7 @@ class WearAuthRepository {
     final userId = (user?['id'] ?? data['userId'] ?? data['id']) as String?;
     final userName = (user?['name'] ?? data['name'] ?? '') as String;
     final profilePicture = user?['profilePicture'] as String?;
+    final role = user?['role'] as String? ?? 'otro';
 
     if (token == null || userId == null) {
       throw Exception('Respuesta de login inesperada.');
@@ -95,6 +98,7 @@ class WearAuthRepository {
       token: token,
       userId: userId,
       userName: userName,
+      role: role,
       profilePicture: profilePicture,
     );
   }
