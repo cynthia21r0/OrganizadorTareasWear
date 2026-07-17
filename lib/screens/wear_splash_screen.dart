@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../services/wear_api_client.dart';
-import '../../services/wear_auth_repository.dart';
-import '../../services/wear_task_repository.dart';
-import '../../services/notification_service.dart';
-import '../../models/wear_task.dart';
-import '../../theme/wear_colors.dart';
+import '../services/wear_api_client.dart';
+import '../services/wear_auth_repository.dart';
+import '../services/wear_task_repository.dart';
+import '../services/notification_service.dart';
+import '../services/auth_storage.dart';
+import '../models/wear_task.dart';
+import '../theme/wear_colors.dart';
 import 'task_list_screen.dart';
 
 class WearSplashScreen extends StatefulWidget {
@@ -27,12 +28,35 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
     try {
       await NotificationService().init();
 
-      final result = await WearAuthRepository().getFirstUser();
+      // Intentar recuperar sesión guardada
+      final saved = await AuthStorage.load();
+      String token, userId, userName;
+      String? profilePicture;
 
-      WearApiClient.instance.token = result.token;
-      WearApiClient.instance.userId = result.userId;
+      if (saved != null) {
+        token = saved['token']!;
+        userId = saved['userId']!;
+        userName = saved['userName'] ?? '';
+        profilePicture = saved['profilePicture'];
+        WearApiClient.instance.token = token;
+        WearApiClient.instance.userId = userId;
+      } else {
+        final result = await WearAuthRepository().getFirstUser();
+        token = result.token;
+        userId = result.userId;
+        userName = result.userName;
+        profilePicture = result.profilePicture;
+        WearApiClient.instance.token = token;
+        WearApiClient.instance.userId = userId;
+        await AuthStorage.save(
+          token: token,
+          userId: userId,
+          userName: userName,
+          profilePicture: profilePicture,
+        );
+      }
 
-      final tasks = await WearTaskRepository().getMyTasks(result.userId);
+      final tasks = await WearTaskRepository().getMyTasks(userId);
 
       final pendingTasksCount = tasks
           .where((t) => t.status == WearTaskStatus.pendiente)
@@ -47,13 +71,15 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => TaskListScreen(
-            userName: result.userName.isNotEmpty ? result.userName : 'Usuario',
-            profilePicture: result.profilePicture,
+            userName: userName.isNotEmpty ? userName : 'Usuario',
+            profilePicture: profilePicture,
             initialTasks: tasks,
           ),
         ),
       );
     } catch (e) {
+      // Si el token guardado ya no es válido, limpiar y reintentar con login
+      await AuthStorage.clear();
       if (mounted) {
         setState(() => _error = 'Error: $e');
       }
@@ -85,7 +111,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'HomeTasks',
                 style: TextStyle(
                   fontSize: 16,
@@ -116,7 +142,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                   ),
                 ),
               ] else ...[
-                const SizedBox(
+                SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
@@ -125,7 +151,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Cargando...',
                   style: TextStyle(fontSize: 12, color: WearColors.headerTeal),
                 ),
