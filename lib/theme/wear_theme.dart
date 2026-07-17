@@ -64,15 +64,17 @@ class WearThemeProvider extends StatefulWidget {
 }
 
 class _WearThemeProviderState extends State<WearThemeProvider> {
+  void _onThemeChanged() => setState(() {});
+
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(() => setState(() {}));
+    widget.controller.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
-    widget.controller.dispose();
+    widget.controller.removeListener(_onThemeChanged);
     super.dispose();
   }
 

@@ -19,12 +19,14 @@ class WearMenuScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: WearColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: hPad),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: isRound ? 20 : 12),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Column(
+              children: [
+                SizedBox(height: isRound ? 20 : 12),
               const Text(
                 'MENÚ',
                 style: TextStyle(
@@ -83,6 +85,7 @@ class WearMenuScreen extends StatelessWidget {
               SizedBox(height: isRound ? 20 : 8),
             ],
           ),
+        ),
         ),
       ),
     );

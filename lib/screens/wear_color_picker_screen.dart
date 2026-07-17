@@ -15,10 +15,9 @@ class WearColorPickerScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: WearColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: hPad),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: isRound ? 20 : 12),
               const Text(
@@ -38,9 +37,11 @@ class WearColorPickerScreen extends StatelessWidget {
                   child: _PaletteTile(
                     palette: palette,
                     isSelected: controller.palette.id == palette.id,
-                    onTap: () {
-                      controller.setPalette(palette);
-                      Navigator.of(context).popUntil((r) => r.isFirst);
+                    onTap: () async {
+                      await controller.setPalette(palette);
+                      if (context.mounted) {
+                        Navigator.of(context).popUntil((r) => r.isFirst);
+                      }
                     },
                   ),
                 ),

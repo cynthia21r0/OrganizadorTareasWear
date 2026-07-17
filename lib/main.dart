@@ -26,9 +26,14 @@ class HomeTasksWearApp extends StatelessWidget {
   }
 }
 
-class _AppRoot extends StatelessWidget {
+class _AppRoot extends StatefulWidget {
   const _AppRoot();
 
+  @override
+  State<_AppRoot> createState() => _AppRootState();
+}
+
+class _AppRootState extends State<_AppRoot> {
   @override
   Widget build(BuildContext context) {
     final primary = WearTheme.primary(context);
