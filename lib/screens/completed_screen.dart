@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/wear_task.dart';
 import '../services/wear_task_repository.dart';
 import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import '../utils/screen_utils.dart';
 
 class CompletedScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
+    final primary = WearTheme.primary(context);
     return Scaffold(
       backgroundColor: WearColors.white,
       body: SafeArea(
@@ -51,8 +53,8 @@ class _CompletedScreenState extends State<CompletedScreen> {
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: const BoxDecoration(
-                    color: WearColors.success,
+                  decoration: BoxDecoration(
+                    color: primary,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check, color: Colors.white, size: 26),
@@ -84,7 +86,7 @@ class _CompletedScreenState extends State<CompletedScreen> {
                   child: ElevatedButton(
                     onPressed: _syncing ? null : _finishAndReturn,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: WearColors.headerTeal,
+                      backgroundColor: primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 11),

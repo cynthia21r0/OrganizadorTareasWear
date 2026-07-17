@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/wear_task.dart';
 import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import '../utils/screen_utils.dart';
 import 'task_detail_screen.dart';
 import 'wear_menu_screen.dart';
@@ -62,6 +63,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       backgroundColor: WearColors.background,
       body: SafeArea(
         child: CustomScrollView(
+          physics: const ClampingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(child: _buildHeader(context, hPad, isRound)),
             SliverPadding(
@@ -88,12 +90,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildHeader(BuildContext context, double hPad, bool isRound) {
+    final primary = WearTheme.primary(context);
+    final dark = WearTheme.dark(context);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(hPad, isRound ? 18 : 12, hPad, 14),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [WearColors.headerTeal, WearColors.headerTealDark],
+          colors: [primary, dark],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -123,29 +127,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
           const SizedBox(height: 8),
           // Botón de menú pill
-          GestureDetector(
-            onTap: _openMenu,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.more_horiz, color: Colors.white, size: 13),
-                  SizedBox(width: 4),
-                  Text(
-                    'MENÚ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+          Material(
+            color: Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              onTap: _openMenu,
+              borderRadius: BorderRadius.circular(20),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.more_horiz, color: Colors.white, size: 13),
+                    SizedBox(width: 4),
+                    Text(
+                      'MENÚ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -197,70 +202,64 @@ class _TaskListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDone = task.status == WearTaskStatus.completada;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: WearColors.cardBackground,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(
-              color: WearColors.cardShadow,
-              blurRadius: 6,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: WearColors.headerTeal.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(10),
+    final primary = WearTheme.primary(context);
+    final dark = WearTheme.dark(context);
+    return Material(
+      color: WearColors.cardBackground,
+      borderRadius: BorderRadius.circular(14),
+      elevation: 2,
+      shadowColor: WearColors.cardShadow,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(task.icon, color: dark, size: 17),
               ),
-              child: Icon(
-                task.icon,
-                color: WearColors.headerTealDark,
-                size: 17,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: WearColors.textNavy,
-                      decoration: isDone ? TextDecoration.lineThrough : null,
-                      height: 1.15,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: WearColors.textNavy,
+                        decoration: isDone ? TextDecoration.lineThrough : null,
+                        height: 1.15,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    task.timeLabel,
-                    style: const TextStyle(
-                      fontSize: 9.5,
-                      color: WearColors.textSecondary,
+                    const SizedBox(height: 2),
+                    Text(
+                      task.timeLabel,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        color: WearColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: WearColors.textSecondary.withOpacity(0.5),
-              size: 16,
-            ),
-          ],
+              Icon(
+                Icons.chevron_right,
+                color: WearColors.textSecondary.withValues(alpha: 0.5),
+                size: 16,
+              ),
+            ],
+          ),
         ),
       ),
     );

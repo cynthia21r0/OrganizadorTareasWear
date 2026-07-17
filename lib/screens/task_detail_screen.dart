@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/wear_task.dart';
 import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import '../utils/screen_utils.dart';
 import 'starting_task_screen.dart';
 
@@ -42,14 +43,15 @@ class TaskDetailScreen extends StatelessWidget {
       backgroundColor: WearColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.fromLTRB(hPad, isRound ? 16 : 12, hPad, 14),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [WearColors.headerTeal, WearColors.headerTealDark],
+                    colors: [WearTheme.primary(context), WearTheme.dark(context)],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -85,15 +87,15 @@ class TaskDetailScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor: WearColors.headerTeal.withOpacity(0.15),
+                      backgroundColor: WearTheme.primary(context).withValues(alpha: 0.15),
                       backgroundImage: _getAvatarImage(avatarUrl),
                       child: avatarUrl == null
                           ? Text(
                               userName.isNotEmpty
                                   ? userName[0].toUpperCase()
                                   : '?',
-                              style: const TextStyle(
-                                color: WearColors.headerTealDark,
+                              style: TextStyle(
+                                color: WearTheme.dark(context),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                               ),
@@ -101,7 +103,7 @@ class TaskDetailScreen extends StatelessWidget {
                           : null,
                     ),
                     const SizedBox(height: 10),
-                    Icon(task.icon, color: WearColors.headerTealDark, size: 26),
+                    Icon(task.icon, color: WearTheme.dark(context), size: 26),
                     const SizedBox(height: 8),
                     Text(
                       task.title,
@@ -189,32 +191,40 @@ class _PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = WearTheme.primary(context);
+    final dark = WearTheme.dark(context);
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: filled ? WearColors.headerTeal : Colors.white,
-          foregroundColor: filled ? Colors.white : WearColors.headerTealDark,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 11),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: bare
-                ? BorderSide.none
-                : BorderSide(
-                    color: filled ? Colors.transparent : WearColors.headerTeal,
-                    width: 1.3,
+      child: Material(
+        color: filled ? primary : Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 11),
+            decoration: bare
+                ? null
+                : BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: filled
+                        ? null
+                        : Border.all(color: primary, width: 1.3),
                   ),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.3,
-            color: bare ? WearColors.textSecondary : null,
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.3,
+                color: bare
+                    ? WearColors.textSecondary
+                    : filled
+                        ? Colors.white
+                        : dark,
+              ),
+            ),
           ),
         ),
       ),

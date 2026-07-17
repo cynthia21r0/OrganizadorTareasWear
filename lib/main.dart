@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
 import 'screens/wear_splash_screen.dart';
 import 'theme/wear_colors.dart';
+import 'theme/wear_theme.dart';
 
-void main() {
-  runApp(const HomeTasksWearApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Cargar paleta guardada antes de mostrar cualquier UI
+  final controller = WearThemeController();
+  await controller.load();
+
+  runApp(HomeTasksWearApp(themeController: controller));
 }
 
 class HomeTasksWearApp extends StatelessWidget {
-  const HomeTasksWearApp({super.key});
+  final WearThemeController themeController;
+  const HomeTasksWearApp({super.key, required this.themeController});
 
   @override
   Widget build(BuildContext context) {
+    return WearThemeProvider(
+      controller: themeController,
+      child: const _AppRoot(),
+    );
+  }
+}
+
+class _AppRoot extends StatelessWidget {
+  const _AppRoot();
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = WearTheme.primary(context);
     return MaterialApp(
       title: 'HomeTasks Wear',
       debugShowCheckedModeBanner: false,
@@ -19,8 +40,8 @@ class HomeTasksWearApp extends StatelessWidget {
         scaffoldBackgroundColor: WearColors.background,
         fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: WearColors.headerTeal,
-          primary: WearColors.headerTeal,
+          seedColor: primary,
+          primary: primary,
         ),
       ),
       home: const WearSplashScreen(),
