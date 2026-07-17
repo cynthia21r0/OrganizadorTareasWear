@@ -29,15 +29,15 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
       await NotificationService().init();
 
       // Intentar recuperar sesión guardada
-      final saved = await AuthStorage.load();
+      final saved = await AuthStorage.loadActive();
       String token, userId, userName;
       String? profilePicture;
 
       if (saved != null) {
-        token = saved['token']!;
-        userId = saved['userId']!;
-        userName = saved['userName'] ?? '';
-        profilePicture = saved['profilePicture'];
+        token = saved.token;
+        userId = saved.userId;
+        userName = saved.userName;
+        profilePicture = saved.profilePicture;
         WearApiClient.instance.token = token;
         WearApiClient.instance.userId = userId;
       } else {
@@ -48,12 +48,12 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
         profilePicture = result.profilePicture;
         WearApiClient.instance.token = token;
         WearApiClient.instance.userId = userId;
-        await AuthStorage.save(
+        await AuthStorage.saveAccount(SavedAccount(
           token: token,
           userId: userId,
           userName: userName,
           profilePicture: profilePicture,
-        );
+        ));
       }
 
       final tasks = await WearTaskRepository().getMyTasks(userId);
@@ -79,7 +79,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
       );
     } catch (e) {
       // Si el token guardado ya no es válido, limpiar y reintentar con login
-      await AuthStorage.clear();
+      await AuthStorage.clearAll();
       if (mounted) {
         setState(() => _error = 'Error: $e');
       }

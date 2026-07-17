@@ -3,6 +3,7 @@ import '../models/wear_task.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
 import 'task_detail_screen.dart';
+import 'wear_menu_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
   final String userName;
@@ -80,6 +81,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  void _openMenu() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const WearMenuScreen()),
+    );
+  }
+
   Widget _buildHeader(BuildContext context, double hPad, bool isRound) {
     return Container(
       width: double.infinity,
@@ -114,7 +121,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          // Botón de menú pill
+          GestureDetector(
+            onTap: _openMenu,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.more_horiz, color: Colors.white, size: 13),
+                  SizedBox(width: 4),
+                  Text(
+                    'MENÚ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -143,7 +178,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             child: LinearProgressIndicator(
               value: _tasks.isEmpty ? 0 : _completedCount / _tasks.length,
               minHeight: 4,
-              backgroundColor: Colors.white.withOpacity(0.35),
+              backgroundColor: Colors.white.withValues(alpha: 0.35),
               valueColor: const AlwaysStoppedAnimation(Colors.white),
             ),
           ),
