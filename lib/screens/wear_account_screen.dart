@@ -4,6 +4,7 @@ import '../services/wear_api_client.dart';
 import '../services/wear_auth_repository.dart';
 import '../services/wear_task_repository.dart';
 import '../theme/wear_colors.dart';
+import '../theme/wear_theme.dart';
 import '../utils/screen_utils.dart';
 import '../widgets/wear_error_tile.dart';
 import 'task_list_screen.dart';
@@ -71,13 +72,15 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
+    final primary = WearTheme.primary(context);
+    final dark = WearTheme.dark(context);
 
     return Scaffold(
       backgroundColor: WearColors.background,
       body: SafeArea(
         child: _loading
-            ? const Center(
-                child: CircularProgressIndicator(color: WearColors.headerTeal),
+            ? Center(
+                child: CircularProgressIndicator(color: primary),
               )
             : CustomScrollView(
                 slivers: [
@@ -107,6 +110,8 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
                         return _AccountTile(
                           account: acc,
                           isActive: isActive,
+                          primary: primary,
+                          dark: dark,
                           onTap: isActive ? null : () => _switchTo(acc),
                           onRemove: () => _removeAccount(acc),
                         );
@@ -120,12 +125,14 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
                         _ActionButton(
                           icon: Icons.login,
                           label: 'Iniciar sesión',
+                          primary: primary,
                           onTap: _openLogin,
                         ),
                         const SizedBox(height: 6),
                         _ActionButton(
                           icon: Icons.keyboard_arrow_up,
                           label: 'Volver',
+                          primary: primary,
                           onTap: () => Navigator.of(context).pop(),
                         ),
                       ]),
@@ -141,12 +148,16 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
 class _AccountTile extends StatelessWidget {
   final SavedAccount account;
   final bool isActive;
+  final Color primary;
+  final Color dark;
   final VoidCallback? onTap;
   final VoidCallback onRemove;
 
   const _AccountTile({
     required this.account,
     required this.isActive,
+    required this.primary,
+    required this.dark,
     required this.onTap,
     required this.onRemove,
   });
@@ -159,11 +170,11 @@ class _AccountTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
-              ? WearColors.headerTeal.withOpacity(0.15)
+              ? primary.withOpacity(0.15)
               : WearColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
           border: isActive
-              ? Border.all(color: WearColors.headerTeal, width: 1.5)
+              ? Border.all(color: primary, width: 1.5)
               : null,
           boxShadow: const [
             BoxShadow(
@@ -174,15 +185,15 @@ class _AccountTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: WearColors.headerTeal.withOpacity(0.2),
+              backgroundColor: primary.withOpacity(0.2),
               child: Text(
                 account.userName.isNotEmpty
                     ? account.userName[0].toUpperCase()
                     : '?',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: WearColors.headerTealDark),
+                    color: dark),
               ),
             ),
             const SizedBox(width: 8),
@@ -194,12 +205,12 @@ class _AccountTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: isActive ? WearColors.headerTealDark : WearColors.textNavy,
+                  color: isActive ? dark : WearColors.textNavy,
                 ),
               ),
             ),
             if (isActive)
-              const Icon(Icons.check_circle, color: WearColors.headerTeal, size: 14)
+              Icon(Icons.check_circle, color: primary, size: 14)
             else
               GestureDetector(
                 onTap: onRemove,
@@ -216,10 +227,15 @@ class _AccountTile extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color primary;
   final VoidCallback onTap;
 
-  const _ActionButton(
-      {required this.icon, required this.label, required this.onTap});
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.primary,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +253,7 @@ class _ActionButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: WearColors.headerTeal, size: 16),
+            Icon(icon, color: primary, size: 16),
             const SizedBox(width: 8),
             Text(
               label,
@@ -356,6 +372,7 @@ class _AuthFormScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
+    final primary = WearTheme.primary(context);
     return Scaffold(
       backgroundColor: WearColors.background,
       body: SafeArea(
@@ -386,7 +403,7 @@ class _AuthFormScaffold extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: WearColors.headerTeal,
+                    color: primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
@@ -421,12 +438,12 @@ class _AuthFormScaffold extends StatelessWidget {
                           offset: Offset(0, 2))
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.keyboard_arrow_up,
-                          color: WearColors.headerTeal, size: 16),
-                      SizedBox(width: 8),
-                      Text(
+                          color: primary, size: 16),
+                      const SizedBox(width: 8),
+                      const Text(
                         'Volver',
                         style: TextStyle(
                             fontSize: 11,
@@ -455,6 +472,7 @@ class _WearTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = WearTheme.primary(context);
     return TextField(
       controller: controller,
       obscureText: obscure,
@@ -469,17 +487,15 @@ class _WearTextField extends StatelessWidget {
             const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-              BorderSide(color: WearColors.headerTeal.withOpacity(0.4)),
+          borderSide: BorderSide(color: primary.withOpacity(0.4)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-              BorderSide(color: WearColors.headerTeal.withOpacity(0.3)),
+          borderSide: BorderSide(color: primary.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: WearColors.headerTeal),
+          borderSide: BorderSide(color: primary),
         ),
       ),
     );

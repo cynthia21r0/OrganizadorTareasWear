@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/auth_storage.dart';
+import '../services/wear_auth_repository.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
 
@@ -14,6 +15,7 @@ class WearEditProfileScreen extends StatefulWidget {
 
 class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
   SavedAccount? _account;
+  WearFamilyMember? _me;
   bool _loading = true;
 
   @override
@@ -24,8 +26,17 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
 
   Future<void> _load() async {
     final account = await AuthStorage.loadActive();
+    WearFamilyMember? me;
+    try {
+      me = await WearAuthRepository().getMe();
+    } catch (_) {
+      // Sin conexión o error del servidor: seguimos con los datos locales
+      me = null;
+    }
+    if (!mounted) return;
     setState(() {
       _account = account;
+      _me = me;
       _loading = false;
     });
   }
@@ -56,9 +67,14 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
-    final avatarBytes = _account?.profilePicture != null
-        ? _decodeAvatar(_account!.profilePicture!)
-        : null;
+
+    // Preferimos los datos frescos del backend; si no hay, caemos al local.
+    final name = _me?.name ?? _account?.userName ?? '';
+    final role = _me?.role ?? _account?.role ?? 'otro';
+    final email = _me?.email;
+    final rawPicture = _me?.profilePicture ?? _account?.profilePicture;
+    final avatarBytes = rawPicture != null ? _decodeAvatar(rawPicture) : null;
+    final hasData = _account != null || _me != null;
 
     return Scaffold(
       backgroundColor: WearColors.background,
@@ -84,7 +100,7 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    if (_account == null)
+                    if (!hasData)
                       const Center(
                         child: Text(
                           'No hay sesión activa',
@@ -103,9 +119,7 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
                               : null,
                           child: avatarBytes == null
                               ? Text(
-                                  _account!.userName.isNotEmpty
-                                      ? _account!.userName[0].toUpperCase()
-                                      : '?',
+                                  name.isNotEmpty ? name[0].toUpperCase() : '?',
                                   style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -115,14 +129,25 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      _InfoRow(label: 'Nombre', value: _account!.userName),
+                      _InfoRow(label: 'Nombre', value: name),
                       const SizedBox(height: 8),
-                      _InfoRow(label: 'Correo', value: _account!.email),
-                      const SizedBox(height: 8),
+                      if (email != null && email.isNotEmpty) ...[
+                        _InfoRow(label: 'Correo', value: email),
+                        const SizedBox(height: 8),
+                      ],
                       _InfoRow(
                         label: 'Rol',
-                        value: _roleLabels[_account!.role] ?? _account!.role,
+                        value: _roleLabels[role] ?? role,
                       ),
+                      if (email == null || email.isEmpty) ...[
+                        const SizedBox(height: 8),
+                        const Text(
+                          'No se pudo cargar el correo. Verifica tu conexión.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 9.5, color: WearColors.textSecondary),
+                        ),
+                      ],
                     ],
 
                     const SizedBox(height: 14),

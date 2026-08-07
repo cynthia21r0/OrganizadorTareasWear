@@ -128,4 +128,9 @@ class WearAuthRepository {
     const password = 'EsTrada12#';
     return login(email, password);
   }
+
+  Future<WearFamilyMember> getMe() async {
+    final response = await _dio.get('/users/me');
+    return WearFamilyMember.fromJson(response.data as Map<String, dynamic>);
+  }
 }
