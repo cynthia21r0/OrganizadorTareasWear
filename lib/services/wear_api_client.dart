@@ -34,7 +34,7 @@ class WearApiClient {
   static final WearApiClient instance = WearApiClient._internal();
 
   static const String baseUrl =
-      'http://10.0.2.2:3000/api';
+      'https://organizadortareasback.onrender.com/api';
 
   late final Dio _dio;
   Dio get dio => _dio;
@@ -53,15 +53,22 @@ class WearApiClient {
     }
 
     switch (e.response?.statusCode) {
-      case 400: return 'Datos incorrectos. Revisa los campos.';
-      case 401: return 'Sesión expirada. Inicia sesión de nuevo.';
-      case 403: return 'No tienes permiso para esta acción.';
-      case 404: return 'No se encontró el recurso.';
-      case 409: return 'Ya existe un registro con esos datos.';
-      case 422: return 'Información inválida.';
+      case 400:
+        return 'Datos incorrectos. Revisa los campos.';
+      case 401:
+        return 'Sesión expirada. Inicia sesión de nuevo.';
+      case 403:
+        return 'No tienes permiso para esta acción.';
+      case 404:
+        return 'No se encontró el recurso.';
+      case 409:
+        return 'Ya existe un registro con esos datos.';
+      case 422:
+        return 'Información inválida.';
       case 500:
       case 502:
-      case 503: return 'Error en el servidor. Intenta más tarde.';
+      case 503:
+        return 'Error en el servidor. Intenta más tarde.';
     }
 
     switch (e.type) {
