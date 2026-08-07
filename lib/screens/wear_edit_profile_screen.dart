@@ -1,10 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/auth_storage.dart';
-import '../services/wear_api_client.dart';
-import '../services/wear_auth_repository.dart';
 import '../theme/wear_colors.dart';
 import '../utils/screen_utils.dart';
-import '../widgets/wear_error_tile.dart';
 
 class WearEditProfileScreen extends StatefulWidget {
   const WearEditProfileScreen({super.key});
@@ -14,263 +13,194 @@ class WearEditProfileScreen extends StatefulWidget {
 }
 
 class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _newPassCtrl = TextEditingController();
-  final _currentPassCtrl = TextEditingController();
-
-  bool _saving = false;
-  bool _success = false;
-  String? _error;
+  SavedAccount? _account;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _prefill();
+    _load();
   }
 
-  Future<void> _prefill() async {
+  Future<void> _load() async {
     final account = await AuthStorage.loadActive();
-    if (account == null) return;
-    _nameCtrl.text = account.userName;
+    setState(() {
+      _account = account;
+      _loading = false;
+    });
   }
 
-  Future<void> _save() async {
-    final name = _nameCtrl.text.trim();
-    final email = _emailCtrl.text.trim();
-    final newPass = _newPassCtrl.text;
-    final currentPass = _currentPassCtrl.text;
+  static const _roleLabels = {
+    'padre': 'Padre',
+    'madre': 'Madre',
+    'hijo': 'Hijo',
+    'hija': 'Hija',
+    'abuelo': 'Abuelo',
+    'abuela': 'Abuela',
+    'tio': 'Tío',
+    'tia': 'Tía',
+    'otro': 'Otro',
+  };
 
-    if (name.isEmpty && email.isEmpty && newPass.isEmpty) {
-      setState(() => _error = 'Modifica al menos un campo.');
-      return;
-    }
-    if (newPass.isNotEmpty && currentPass.isEmpty) {
-      setState(() => _error = 'Ingresa tu contraseña actual para cambiarla.');
-      return;
-    }
-
-    setState(() { _saving = true; _error = null; _success = false; });
+  Uint8List? _decodeAvatar(String base64Str) {
     try {
-      await WearAuthRepository().updateProfile(
-        name: name.isEmpty ? null : name,
-        email: email.isEmpty ? null : email,
-        password: newPass.isEmpty ? null : newPass,
-        currentPassword: currentPass.isEmpty ? null : currentPass,
-      );
-
-      // Actualizar nombre en el storage si cambió
-      if (name.isNotEmpty) {
-        final account = await AuthStorage.loadActive();
-        if (account != null) {
-          await AuthStorage.saveAccount(SavedAccount(
-            token: account.token,
-            userId: account.userId,
-            userName: name,
-            role: account.role,
-            profilePicture: account.profilePicture,
-          ));
-        }
-      }
-
-      _newPassCtrl.clear();
-      _currentPassCtrl.clear();
-      setState(() => _success = true);
-    } catch (e) {
-      setState(() => _error = friendlyError(e));
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      final clean = base64Str.contains(',')
+          ? base64Str.split(',').last
+          : base64Str;
+      return base64Decode(clean);
+    } catch (_) {
+      return null;
     }
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _newPassCtrl.dispose();
-    _currentPassCtrl.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
+    final avatarBytes = _account?.profilePicture != null
+        ? _decodeAvatar(_account!.profilePicture!)
+        : null;
 
     return Scaffold(
       backgroundColor: WearColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'MI PERFIL',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: WearColors.textSecondary,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              _WearField(controller: _nameCtrl, hint: 'Nombre'),
-              const SizedBox(height: 6),
-              _WearField(controller: _emailCtrl, hint: 'Nuevo correo'),
-              const SizedBox(height: 6),
-              _WearField(
-                  controller: _newPassCtrl,
-                  hint: 'Nueva contraseña',
-                  obscure: true),
-              const SizedBox(height: 6),
-              _WearField(
-                  controller: _currentPassCtrl,
-                  hint: 'Contraseña actual',
-                  obscure: true),
-
-              const SizedBox(height: 10),
-
-              if (_error != null) ...[
-                WearErrorTile(_error!),
-                const SizedBox(height: 8),
-              ],
-
-              if (_success) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: Colors.green.withValues(alpha: 0.4)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.check_circle_outline,
-                          color: Colors.green, size: 14),
-                      SizedBox(width: 6),
-                      Text(
-                        'Perfil actualizado',
-                        style: TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF2E7D32)),
+        child: _loading
+            ? const Center(
+                child: CircularProgressIndicator(color: WearColors.headerTeal),
+              )
+            : SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'MI PERFIL',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: WearColors.textSecondary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
+                    ),
+                    const SizedBox(height: 16),
 
-              // Guardar
-              GestureDetector(
-                onTap: _saving ? null : _save,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: WearColors.headerTeal,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: _saving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text(
-                          'GUARDAR',
+                    if (_account == null)
+                      const Center(
+                        child: Text(
+                          'No hay sesión activa',
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
+                              fontSize: 11, color: WearColors.textSecondary),
                         ),
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // Volver
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: WearColors.cardBackground,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: WearColors.cardShadow,
-                          blurRadius: 4,
-                          offset: Offset(0, 2))
-                    ],
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.keyboard_arrow_up,
-                          color: WearColors.headerTeal, size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        'Volver',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: WearColors.textNavy),
+                      )
+                    else ...[
+                      Center(
+                        child: CircleAvatar(
+                          radius: 28,
+                          backgroundColor:
+                              WearColors.headerTeal.withOpacity(0.2),
+                          backgroundImage: avatarBytes != null
+                              ? MemoryImage(avatarBytes)
+                              : null,
+                          child: avatarBytes == null
+                              ? Text(
+                                  _account!.userName.isNotEmpty
+                                      ? _account!.userName[0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: WearColors.headerTealDark),
+                                )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _InfoRow(label: 'Nombre', value: _account!.userName),
+                      const SizedBox(height: 8),
+                      _InfoRow(
+                        label: 'Rol',
+                        value: _roleLabels[_account!.role] ?? _account!.role,
                       ),
                     ],
-                  ),
+
+                    const SizedBox(height: 14),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: WearColors.cardBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: WearColors.cardShadow,
+                                blurRadius: 4,
+                                offset: Offset(0, 2))
+                          ],
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.keyboard_arrow_up,
+                                color: WearColors.headerTeal, size: 16),
+                            SizedBox(width: 8),
+                            Text(
+                              'Volver',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: WearColors.textNavy),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
 
-class _WearField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final bool obscure;
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
 
-  const _WearField({
-    required this.controller,
-    required this.hint,
-    this.obscure = false,
-  });
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      style: const TextStyle(fontSize: 11, color: WearColors.textNavy),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle:
-            const TextStyle(fontSize: 11, color: WearColors.textSecondary),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-              color: WearColors.headerTeal.withValues(alpha: 0.4)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-              color: WearColors.headerTeal.withValues(alpha: 0.3)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: WearColors.headerTeal),
-        ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: WearColors.headerTeal.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 8.5,
+              fontWeight: FontWeight.bold,
+              color: WearColors.textSecondary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: WearColors.textNavy,
+            ),
+          ),
+        ],
       ),
     );
   }

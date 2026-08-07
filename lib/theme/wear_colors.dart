@@ -69,6 +69,42 @@ class WearColors {
       primary: Color(0xFFE8834A),
       dark:    Color(0xFFD7723A),
     ),
+    WearPalette(
+      id: 'coral',
+      label: 'Coral',
+      primary: Color(0xFFE86A6A),
+      dark:    Color(0xFFD65858),
+    ),
+    WearPalette(
+      id: 'pink',
+      label: 'Rosa',
+      primary: Color(0xFFE06BA8),
+      dark:    Color(0xFFCF5997),
+    ),
+    WearPalette(
+      id: 'amber',
+      label: 'Ámbar',
+      primary: Color(0xFFE0A83E),
+      dark:    Color(0xFFCC962E),
+    ),
+    WearPalette(
+      id: 'brown',
+      label: 'Café',
+      primary: Color(0xFFA0765A),
+      dark:    Color(0xFF8C6249),
+    ),
+    WearPalette(
+      id: 'slate',
+      label: 'Gris pizarra',
+      primary: Color(0xFF708499),
+      dark:    Color(0xFF5D7186),
+    ),
+    WearPalette(
+      id: 'mint',
+      label: 'Menta',
+      primary: Color(0xFF4DBFA3),
+      dark:    Color(0xFF3CA88D),
+    ),
   ];
 
   static WearPalette paletteById(String id) =>

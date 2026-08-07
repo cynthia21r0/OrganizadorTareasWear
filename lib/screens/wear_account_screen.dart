@@ -68,12 +68,6 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
     ).then((_) => _loadAccounts());
   }
 
-  void _openRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const _WearRegisterForm()),
-    ).then((_) => _loadAccounts());
-  }
-
   @override
   Widget build(BuildContext context) {
     final hPad = safeHorizontalPadding(context);
@@ -127,12 +121,6 @@ class _WearAccountScreenState extends State<WearAccountScreen> {
                           icon: Icons.login,
                           label: 'Iniciar sesión',
                           onTap: _openLogin,
-                        ),
-                        const SizedBox(height: 6),
-                        _ActionButton(
-                          icon: Icons.person_add_outlined,
-                          label: 'Registrar usuario',
-                          onTap: _openRegister,
                         ),
                         const SizedBox(height: 6),
                         _ActionButton(
@@ -341,131 +329,6 @@ class _WearLoginFormState extends State<_WearLoginForm> {
           const SizedBox(height: 6),
           _WearTextField(
               controller: _passCtrl, hint: 'Contraseña', obscure: true),
-        ],
-      );
-}
-
-// ── Register form ─────────────────────────────────────────────────────────────
-
-class _WearRegisterForm extends StatefulWidget {
-  const _WearRegisterForm();
-
-  @override
-  State<_WearRegisterForm> createState() => _WearRegisterFormState();
-}
-
-class _WearRegisterFormState extends State<_WearRegisterForm> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  final _inviteCtrl = TextEditingController();
-  bool _loading = false;
-  String? _error;
-
-  static const _roles = [
-    'padre', 'madre', 'hijo', 'hija',
-    'abuelo', 'abuela', 'tio', 'tia', 'otro'
-  ];
-  String _role = 'otro';
-
-  Future<void> _submit() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final result = await WearAuthRepository().register(
-        name: _nameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
-        role: _role,
-        inviteCode: _inviteCtrl.text.trim().isEmpty
-            ? null
-            : _inviteCtrl.text.trim(),
-      );
-
-      final account = SavedAccount(
-        token: result.token,
-        userId: result.userId,
-        userName: result.userName,
-        role: result.role,
-        profilePicture: result.profilePicture,
-      );
-      await AuthStorage.saveAccount(account);
-
-      WearApiClient.instance.token = result.token;
-      WearApiClient.instance.userId = result.userId;
-      WearApiClient.instance.userRole = result.role;
-
-      final tasks = await WearTaskRepository().getMyTasks(result.userId);
-      if (!mounted) return;
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => TaskListScreen(
-            userName: result.userName,
-            profilePicture: result.profilePicture,
-            initialTasks: tasks,
-          ),
-        ),
-        (route) => false,
-      );
-    } catch (e) {
-      setState(() => _error = friendlyError(e));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    _inviteCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => _AuthFormScaffold(
-        title: 'REGISTRAR',
-        loading: _loading,
-        error: _error,
-        onSubmit: _submit,
-        submitLabel: 'CREAR',
-        fields: [
-          _WearTextField(controller: _nameCtrl, hint: 'Nombre', obscure: false),
-          const SizedBox(height: 6),
-          _WearTextField(controller: _emailCtrl, hint: 'Correo', obscure: false),
-          const SizedBox(height: 6),
-          _WearTextField(
-              controller: _passCtrl, hint: 'Contraseña', obscure: true),
-          const SizedBox(height: 6),
-          _WearTextField(
-              controller: _inviteCtrl,
-              hint: 'Código de familia',
-              obscure: false),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: WearColors.headerTeal.withOpacity(0.4)),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _role,
-                isExpanded: true,
-                style: const TextStyle(
-                    fontSize: 11, color: WearColors.textNavy),
-                items: _roles
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                    .toList(),
-                onChanged: (v) => setState(() => _role = v!),
-              ),
-            ),
-          ),
         ],
       );
 }
