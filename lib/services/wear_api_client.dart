@@ -34,7 +34,7 @@ class WearApiClient {
   static final WearApiClient instance = WearApiClient._internal();
 
   static const String baseUrl =
-      'https://organizadortareasback.onrender.com/api';
+      'http://10.0.2.2:3000/api';
 
   late final Dio _dio;
   Dio get dio => _dio;

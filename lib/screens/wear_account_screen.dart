@@ -281,6 +281,7 @@ class _WearLoginFormState extends State<_WearLoginForm> {
         token: result.token,
         userId: result.userId,
         userName: result.userName,
+        email: result.email,
         role: result.role,
         profilePicture: result.profilePicture,
       );

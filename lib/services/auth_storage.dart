@@ -5,6 +5,7 @@ class SavedAccount {
   final String token;
   final String userId;
   final String userName;
+  final String email;
   final String role;
   final String? profilePicture;
 
@@ -12,6 +13,7 @@ class SavedAccount {
     required this.token,
     required this.userId,
     required this.userName,
+    required this.email,
     this.role = 'otro',
     this.profilePicture,
   });
@@ -20,6 +22,7 @@ class SavedAccount {
         'token': token,
         'userId': userId,
         'userName': userName,
+        'email': email,
         'role': role,
         if (profilePicture != null) 'profilePicture': profilePicture,
       };
@@ -28,6 +31,7 @@ class SavedAccount {
         token: j['token'] as String,
         userId: j['userId'] as String,
         userName: j['userName'] as String,
+        email: j['email'] as String? ?? '',
         role: j['role'] as String? ?? 'otro',
         profilePicture: j['profilePicture'] as String?,
       );

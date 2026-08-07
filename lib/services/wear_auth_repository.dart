@@ -5,6 +5,7 @@ class WearLoginResult {
   final String token;
   final String userId;
   final String userName;
+  final String email;
   final String role;
   final String? profilePicture;
 
@@ -12,6 +13,7 @@ class WearLoginResult {
     required this.token,
     required this.userId,
     required this.userName,
+    required this.email,
     this.role = 'otro',
     this.profilePicture,
   });
@@ -103,6 +105,7 @@ class WearAuthRepository {
     final user = data['user'] as Map<String, dynamic>?;
     final userId = (user?['id'] ?? data['userId'] ?? data['id']) as String?;
     final userName = (user?['name'] ?? data['name'] ?? '') as String;
+    final email = (user?['email'] ?? data['email'] ?? '') as String;
     final profilePicture = user?['profilePicture'] as String?;
     final role = user?['role'] as String? ?? 'otro';
 
@@ -114,6 +117,7 @@ class WearAuthRepository {
       token: token,
       userId: userId,
       userName: userName,
+      email: email,
       role: role,
       profilePicture: profilePicture,
     );

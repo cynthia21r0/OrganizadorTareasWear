@@ -117,6 +117,8 @@ class _WearEditProfileScreenState extends State<WearEditProfileScreen> {
                       const SizedBox(height: 14),
                       _InfoRow(label: 'Nombre', value: _account!.userName),
                       const SizedBox(height: 8),
+                      _InfoRow(label: 'Correo', value: _account!.email),
+                      const SizedBox(height: 8),
                       _InfoRow(
                         label: 'Rol',
                         value: _roleLabels[_account!.role] ?? _account!.role,

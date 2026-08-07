@@ -3,7 +3,7 @@ import '../theme/wear_colors.dart';
 import '../theme/wear_theme.dart';
 import '../utils/screen_utils.dart';
 import 'wear_account_screen.dart';
-import 'wear_add_task_screen.dart';
+
 import 'wear_color_picker_screen.dart';
 import 'wear_edit_profile_screen.dart';
 
@@ -37,15 +37,7 @@ class WearMenuScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              _MenuItem(
-                icon: Icons.add_task,
-                label: 'Nueva tarea',
-                primary: primary,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const WearAddTaskScreen()),
-                ),
-              ),
+
               _MenuItem(
                 icon: Icons.person_outline,
                 label: 'Mi perfil',

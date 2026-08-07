@@ -59,6 +59,7 @@ class _WearSplashScreenState extends State<WearSplashScreen> {
           token: token,
           userId: userId,
           userName: userName,
+          email: result.email,
           role: role,
           profilePicture: profilePicture,
         ));
